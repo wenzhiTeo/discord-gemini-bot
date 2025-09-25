@@ -1,5 +1,5 @@
-const config = require("../config");
-const gemini = require("./gemini");
+import config from "../config/index.js";
+import gemini from "./gemini.js";
 
 class HistoryManager {
     constructor() {
@@ -43,4 +43,4 @@ class HistoryManager {
     }
 }
 
-module.exports = new HistoryManager();
+export default new HistoryManager();

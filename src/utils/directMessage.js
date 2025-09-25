@@ -1,4 +1,4 @@
-const config = require("../config");
+import config from "../config/index.js";
 
 class DirectMessageUtil {
     constructor() {
@@ -123,4 +123,4 @@ class DirectMessageUtil {
     }
 }
 
-module.exports = new DirectMessageUtil();
+export default new DirectMessageUtil();

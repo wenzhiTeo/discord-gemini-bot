@@ -1,7 +1,8 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-module.exports = {
-    DISCORD_TOKEN: process.env.DISCORD_API_KEY,
+export default {
+    DISCORD_TOKEN: process.env.DISCORD_TOKEN,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     MODEL_NAME: "gemini-2.0-flash",
     MAX_HISTORY_LENGTH: 20,

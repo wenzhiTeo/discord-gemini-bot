@@ -1,5 +1,5 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const config = require("../config");
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import config from "../config/index.js";
 
 class GeminiService {
     constructor() {
@@ -42,4 +42,4 @@ class GeminiService {
     }
 }
 
-module.exports = new GeminiService();
+export default new GeminiService();

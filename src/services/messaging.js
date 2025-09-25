@@ -1,4 +1,4 @@
-const config = require("../config");
+import config from "../config/index.js";
 
 class MessagingService {
     /**
@@ -32,4 +32,4 @@ class MessagingService {
     }
 }
 
-module.exports = new MessagingService();
+export default new MessagingService();

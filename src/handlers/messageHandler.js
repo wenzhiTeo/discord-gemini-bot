@@ -1,17 +1,16 @@
-const config = require("../config");
-const gemini = require("../services/gemini");
-const history = require("../services/history");
-const messaging = require("../services/messaging");
-const CommandHandler = require("./commandHandler");
+import config from "../config/index.js";
+import gemini from "../services/gemini.js";
+import history from "../services/history.js";
+import messaging from "../services/messaging.js";
 
 class MessageHandler {
     constructor(client) {
         this.client = client;
-        this.commandHandler = new CommandHandler();
     }
 
     shouldReply(message) {
         if (message.author.bot) return { should: false };
+        if (message.channel == '1420345550582317088') return { should: false };
 
         if (config.IS_MENTION_ONLY) {
             if (!message.mentions.has(this.client.user)) {
@@ -30,37 +29,23 @@ class MessageHandler {
         if (!should) return;
 
         const channelId = message.channel.id;
-        const commandInfo = this.commandHandler.checkForCommand(content);
-
-        // $ 开头的命令 - 直接返回模板
-        if (commandInfo && !commandInfo.config.needsCalculation) {
-            const commandResult = this.commandHandler.handleCommand(commandInfo);
-            await messaging.reply(message, commandResult);
-            return;
-        }
-
-        // 杂费计算或普通消息 - 都用 AI 处理
-        history.addUserMessage(channelId, content);
 
         try {
+            // 简单的AI对话处理
+            history.addUserMessage(channelId, content);
             const chatHistory = history.getHistory(channelId);
-            let prompt = content;
 
-            // 如果是杂费计算，使用特殊提示词
-            if (commandInfo && commandInfo.config.needsCalculation) {
-                prompt = this.commandHandler.generateExpensePrompt(content);
-            }
-
-            const response = await gemini.generateResponse(chatHistory, prompt);
+            const response = await gemini.generateResponse(chatHistory, content);
             history.addBotMessage(channelId, response);
             await messaging.reply(message, response);
 
         } catch (error) {
             console.error("Error calling Gemini API:", error);
             history.removeLastUserMessage(channelId);
-            await messaging.reply(message, "呜呜，现在有点呆萌，想不出来说什么了啦... 🥺 可能是网络有点卡住了呢~");
+            const errorResponse = "呜呜，现在有点呆萌，想不出来说什么了啦... 🥺 可能是网络有点卡住了呢~";
+            await messaging.reply(message, errorResponse);
         }
     }
 }
 
-module.exports = MessageHandler;
+export default MessageHandler;
