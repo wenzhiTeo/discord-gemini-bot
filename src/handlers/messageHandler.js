@@ -2,10 +2,12 @@ const config = require("../config");
 const gemini = require("../services/gemini");
 const history = require("../services/history");
 const messaging = require("../services/messaging");
+const CommandHandler = require("./commandHandler");
 
 class MessageHandler {
     constructor(client) {
         this.client = client;
+        this.commandHandler = new CommandHandler();
     }
 
     shouldReply(message) {
@@ -28,13 +30,28 @@ class MessageHandler {
         if (!should) return;
 
         const channelId = message.channel.id;
+        const commandInfo = this.commandHandler.checkForCommand(content);
 
+        // $ 开头的命令 - 直接返回模板
+        if (commandInfo && !commandInfo.config.needsCalculation) {
+            const commandResult = this.commandHandler.handleCommand(commandInfo);
+            await messaging.reply(message, commandResult);
+            return;
+        }
+
+        // 杂费计算或普通消息 - 都用 AI 处理
         history.addUserMessage(channelId, content);
 
         try {
             const chatHistory = history.getHistory(channelId);
-            const response = await gemini.generateResponse(chatHistory, content);
+            let prompt = content;
 
+            // 如果是杂费计算，使用特殊提示词
+            if (commandInfo && commandInfo.config.needsCalculation) {
+                prompt = this.commandHandler.generateExpensePrompt(content);
+            }
+
+            const response = await gemini.generateResponse(chatHistory, prompt);
             history.addBotMessage(channelId, response);
             await messaging.reply(message, response);
 
