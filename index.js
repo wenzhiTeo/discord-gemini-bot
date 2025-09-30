@@ -30,8 +30,8 @@ client.on(Events.ClientReady, async (c) => {
         await initDb();
         console.log('✅ 数据库初始化完成');
 
-        // 重新加载命令处理器的命令
-        await messageHandler.commandHandler.initializeCommands();
+        // // 重新加载命令处理器的命令
+        // await messageHandler.commandHandler.initializeCommands();
     } catch (error) {
         console.error('❌ 数据库初始化失败:', error);
     }
