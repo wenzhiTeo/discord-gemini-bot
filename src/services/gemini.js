@@ -20,7 +20,7 @@ class GeminiService {
         this.systemPrompt = {
             role: "user",
             parts: [{
-                text: NORMAL_PROMPT
+                text: SPECIAL_PROMPT
             }]
         };
 
