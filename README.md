@@ -22,7 +22,6 @@ npm install
 ```env
 DISCORD_TOKEN=your-discord-bot-token
 GEMINI_API_KEY=your-google-gemini-api-key
-PRIVATE_CHANNEL_ID=your-private-channel-id
 ADMIN_PORT=3001
 ```
 

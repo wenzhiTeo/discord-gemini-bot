@@ -4,6 +4,11 @@ import gemini from "./src/services/gemini.js";
 import MessageHandler from "./src/handlers/messageHandler.js";
 import DirectMessage from "./src/utils/directMessage.js";
 import initDb from "./database/initDb.js";
+import cron from "node-cron";
+
+import {
+    checkReminders
+} from "./src/services/reminder.js";
 
 // --- Discord 客户端初始化 ---
 const client = new Client({
@@ -37,12 +42,15 @@ client.on(Events.ClientReady, async (c) => {
     }
 
     // Send notice message to private channel
-    if (config.PRIVATE_CHANNEL_ID && config.PRIVATE_CHANNEL_ID != '1420345550582317088') {
-        await DirectMessage.sendToChannel(config.PRIVATE_CHANNEL_ID, "@everyone Hi, personal bot online");
-        const response = await gemini.generateResponse([gemini.getSystemPrompt()], "简单介绍一下你自己");
-        await DirectMessage.sendToChannel(config.PRIVATE_CHANNEL_ID, `@everyone ${response}`);
+    if (config.INIT_CHANNEL_ID) {
+        await DirectMessage.sendToChannel(config.INIT_CHANNEL_ID, "@everyone Hi, personal bot online");
+        const response = await gemini.generateResponse("简单介绍一下你自己");
+        await DirectMessage.sendToChannel(config.INIT_CHANNEL_ID, `@everyone ${response}`);
     }
 });
+
+
+cron.schedule("* * * * *", () => checkReminders(client));
 
 // --- 消息事件 ---
 client.on(Events.MessageCreate, async (message) => {
