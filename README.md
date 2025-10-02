@@ -1,60 +1,56 @@
 # Discord Gemini Bot
 
-A Discord bot powered by Google's Gemini AI that provides intelligent conversation, reminder functionality, and an admin panel for template management.
+A powerful Discord bot powered by Google's Gemini AI with intelligent conversation, reminder system, and web-based admin panel for easy management.
 
-## Features
+## ✨ Features
 
 ### 🤖 AI Chat Integration
-- **Gemini AI**: Powered by Google's Gemini 2.0 Flash model
-- **Mention-based responses**: Bot responds only when mentioned in channels (configurable)
-- **Image support**: Can analyze and respond to images sent in Discord
-- **Personality**: Cute and helpful character "小云雀来海" with Japanese-style expressions
-- **Message splitting**: Automatically handles long responses by splitting them
-- **Template system**: Admin-configurable AI prompt templates stored in database
+- **Google Gemini 2.0 Flash**: Advanced AI model for natural conversations
+- **Smart Responses**: Responds only when mentioned (configurable)
+- **Image Analysis**: Upload images and get AI-powered analysis
+- **Dynamic Prompts**: Customizable AI personality through admin panel
+- **Auto Message Splitting**: Handles long responses automatically
+- **Real-time Updates**: Prompt changes take effect immediately
 
-### ⏰ Reminder System
-- **Single command**: Only `$设置定时提醒` command (no slash commands)
-- **Template-based setup**: Reply to bot's template message with `HH:mm reminder text`
-- **Automatic notifications**: Cron job checks and sends reminders every minute
-- **User mentions**: Reminds specific users in their original channel
-- **In-memory storage**: Reminders are stored in memory (reset on bot restart)
+### ⏰ Smart Reminders
+- **Simple Setup**: Use `$设置定时提醒` command
+- **Easy Format**: Reply with `HH:mm Your reminder text`
+- **Auto Notifications**: Cron-based scheduling (every minute check)
+- **User Targeting**: Mentions specific users in original channels
+- **Example**: `14:30 Team meeting in conference room`
 
-### 🛠️ Admin Panel
-- **Web interface**: AdminJS-powered admin panel at `http://localhost:3000/admin`
-- **Template management**: Create and manage AI prompt templates
-- **Database operations**: Full CRUD operations for templates
-- **Sample data**: Includes pre-configured templates like "默认对话", "杂费计算", "天气查询"
-- **Real-time updates**: Template changes affect bot behavior immediately
+### 🛠️ Admin Dashboard
+- **Web Interface**: Clean AdminJS panel at `http://localhost:3000/admin`
+- **Prompt Management**: Create, edit, and activate AI templates
+- **Live Preview**: Test prompts before activation
+- **Database Operations**: Full CRUD with SQLite backend
+- **Event System**: Automatic bot reload when prompts change
 
-### 🗄️ Database & Utilities
-- **SQLite**: Lightweight database storage (`bot.db`)
-- **Template system**: Store and manage AI prompt templates with activation status
-- **Auto-initialization**: Database setup with sample data on first run
-- **Direct messaging**: Utility for sending messages to channels, users, or guilds
-- **Startup notifications**: Bot announces when online to configured channel
+### 🔧 Technical Features
+- **SQLite Database**: Lightweight, file-based storage
+- **Event-Driven**: Real-time communication between admin panel and bot
+- **Channel Blacklisting**: Exclude specific channels from bot responses
+- **Startup Notifications**: Configurable bot online announcements
+- **Error Handling**: Graceful fallbacks and user-friendly error messages
 
-## Installation
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- Discord Bot Token
-- Google Gemini API Key
+- **Node.js** v18+ 
+- **Discord Bot Token** ([Get one here](https://discord.com/developers/applications))
+- **Google Gemini API Key** ([Get one here](https://makersuite.google.com/app/apikey))
 
-### Setup
+### Installation
 
-1. **Clone the repository**
+1. **Clone & Install**
    ```bash
    git clone <repository-url>
    cd discord-gemini-bot
-   ```
-
-2. **Install dependencies**
-   ```bash
    npm install
    ```
 
-3. **Environment configuration**
-   Create a `.env` file in the root directory:
+2. **Environment Setup**
+   Create `.env` file:
    ```env
    DISCORD_TOKEN=your_discord_bot_token
    GEMINI_API_KEY=your_gemini_api_key
@@ -62,134 +58,160 @@ A Discord bot powered by Google's Gemini AI that provides intelligent conversati
    BLACKLISTED_CHANNEL_IDS=channel1,channel2,channel3
    ```
 
-4. **Discord Bot Setup**
-   - Create a Discord application at [Discord Developer Portal](https://discord.com/developers/applications)
-   - Create a bot and copy the token
-   - Enable the following bot permissions:
-     - Send Messages
-     - Read Message History
-     - Mention Everyone
-     - Attach Files (for image analysis)
-   - Enable the following privileged gateway intents:
-     - Message Content Intent
-     - Guild Members Intent
+3. **Discord Bot Configuration**
+   
+   **Required Permissions:**
+   - Send Messages
+   - Read Message History  
+   - Mention Everyone
+   - Attach Files
+   
+   **Required Intents:**
+   - Message Content Intent
+   - Guild Members Intent
 
-5. **Google Gemini API**
-   - Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Add it to your `.env` file
+4. **Start the Bot**
+   ```bash
+   npm start
+   ```
+   
+   Access admin panel: `http://localhost:3000/admin`
 
-## Usage
+## 📖 Usage Guide
 
-### Running the Bot
+### Commands
 
-**Development mode** (runs both bot and admin panel):
+#### 💬 Chat with AI
+```
+@YourBot Hello! How are you today?
+@YourBot [attach image] What do you see in this picture?
+```
+
+#### ⏰ Set Reminders
+```
+$设置定时提醒
+```
+Then reply to bot's message with:
+```
+14:30 Team meeting in conference room
+09:00 Take morning medication
+20:00 Call mom for her birthday
+```
+
+### Admin Panel Features
+
+Visit `http://localhost:3000/admin` to:
+
+- **📝 Manage Prompts**: Create and edit AI personality templates
+- **🔄 Live Updates**: Changes apply instantly to the bot
+- **📊 Database View**: Browse all stored data
+- **⚙️ Configuration**: Manage bot behavior settings
+
+### Running Options
+
 ```bash
+# Start bot with admin panel (recommended)
+npm start
+
+# Development mode with auto-restart
 npm run dev
 ```
 
-**Production mode** (bot only):
-```bash
-npm start
-```
-
-**Admin panel only**:
-```bash
-npm run admin
-```
-
-### Bot Commands
-
-#### Reminders
-The bot supports a single text command for setting reminders:
-
-1. **Set Reminder**: Send `$设置定时提醒` in any channel
-2. **Configure**: Reply to the bot's template message with format: `HH:mm Your reminder text`
-3. **Example**: `14:30 Meeting with team`
-
-#### AI Chat
-- **Mention-based**: Mention the bot in any message: `@YourBot Hello, how are you?`
-- **Image analysis**: Send images with text for AI to analyze and respond
-- **Personality**: Bot responds with a cute, helpful personality using Japanese-style expressions
-- **Auto-split**: Long responses are automatically split into multiple messages
-
-### Admin Panel
-
-Access the admin panel at `http://localhost:3000/admin` to:
-- Create new AI prompt templates
-- Edit existing templates
-- Enable/disable templates
-- View template usage statistics
-
-## Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
-| Variable                  | Description                           | Required |
-| ------------------------- | ------------------------------------- | -------- |
-| `DISCORD_TOKEN`           | Discord bot token                     | Yes      |
-| `GEMINI_API_KEY`          | Google Gemini API key                 | Yes      |
-| `INIT_CHANNEL_ID`         | Channel for startup notifications     | No       |
-| `BLACKLISTED_CHANNEL_IDS` | Comma-separated channel IDs to ignore | No       |
+| Variable                  | Description                        | Required | Example              |
+| ------------------------- | ---------------------------------- | -------- | -------------------- |
+| `DISCORD_TOKEN`           | Discord bot token                  | ✅        | `MTIzNDU2Nzg5...`    |
+| `GEMINI_API_KEY`          | Google Gemini API key              | ✅        | `AIzaSyC...`         |
+| `INIT_CHANNEL_ID`         | Startup notification channel       | ❌        | `123456789012345678` |
+| `BLACKLISTED_CHANNEL_IDS` | Ignored channels (comma-separated) | ❌        | `123,456,789`        |
 
-### Bot Configuration
+### Advanced Settings
 
-Edit `src/config/index.js` to modify:
-- `MODEL_NAME`: Gemini model version
-- `MAX_MESSAGE_LENGTH`: Discord message length limit
-- `IS_MENTION_ONLY`: Require mentions to respond
-- `MAX_HISTORY_LENGTH`: Chat history length
+Edit `src/config/index.js`:
 
-## Project Structure
+```javascript
+{
+  MODEL_NAME: "gemini-2.0-flash",        // AI model version
+  MAX_MESSAGE_LENGTH: 2000,              // Discord message limit
+  IS_MENTION_ONLY: true,                 // Require @mention to respond
+  MAX_HISTORY_LENGTH: 20                 // Chat context length
+}
+```
+
+## 📁 Project Structure
 
 ```
 discord-gemini-bot/
-├── src/
-│   ├── config/           # Configuration files
-│   ├── handlers/         # Message handling logic
-│   ├── services/         # Core services (AI, messaging, reminders)
-│   └── utils/           # Utility functions
-├── database/
-│   ├── models/          # Database models
-│   └── initDb.js        # Database initialization
-├── admin.js             # Admin panel server
-├── index.js             # Main bot entry point
-└── package.json         # Dependencies and scripts
+├── 📂 src/
+│   ├── 📂 config/          # Bot configuration
+│   ├── 📂 handlers/        # Message processing
+│   ├── 📂 services/        # Core services (AI, reminders)
+│   └── 📂 utils/          # Helper functions
+├── 📂 database/
+│   ├── 📂 models/         # Data models (Prompt)
+│   └── 📄 index.js        # Database setup
+├── 📄 index.js            # Main application
+├── 📄 .env               # Environment variables
+└── 📄 database.sqlite    # SQLite database
 ```
 
-## Dependencies
+## 🛠️ Tech Stack
 
-### Core
-- `discord.js` - Discord API wrapper
-- `@google/generative-ai` - Google Gemini AI integration
-- `sequelize` - Database ORM
-- `sqlite3` - SQLite database driver
+| Category          | Technology         | Purpose                     |
+| ----------------- | ------------------ | --------------------------- |
+| **Bot Framework** | Discord.js         | Discord API integration     |
+| **AI Engine**     | Google Gemini 2.0  | Natural language processing |
+| **Database**      | SQLite + Sequelize | Data persistence & ORM      |
+| **Admin Panel**   | AdminJS            | Web-based management        |
+| **Scheduling**    | node-cron          | Reminder system             |
+| **Web Server**    | Express.js         | Admin panel hosting         |
 
-### Admin Panel
-- `adminjs` - Admin interface framework
-- `@adminjs/express` - Express.js integration
-- `@adminjs/sequelize` - Sequelize adapter
+## 🔧 Troubleshooting
 
-### Utilities
-- `node-cron` - Task scheduling
-- `dotenv` - Environment variable management
-- `express` - Web server framework
+### Common Issues
 
-## Contributing
+**Bot not responding:**
+- ✅ Check Discord bot permissions
+- ✅ Verify `DISCORD_TOKEN` in `.env`
+- ✅ Ensure bot is mentioned in message (if `IS_MENTION_ONLY: true`)
+
+**AI responses failing:**
+- ✅ Verify `GEMINI_API_KEY` is valid
+- ✅ Check API quota limits
+- ✅ Review console logs for errors
+
+**Admin panel not loading:**
+- ✅ Ensure port 3000 is available
+- ✅ Check if bot is running (`npm start`)
+- ✅ Visit `http://localhost:3000/admin`
+
+**Reminders not working:**
+- ✅ Use exact format: `HH:mm reminder text`
+- ✅ Check console for cron job logs
+- ✅ Verify bot has send message permissions
+
+### Debug Mode
+
+Enable detailed logging:
+```bash
+DEBUG=* npm start
+```
+
+## 📄 License
+
+ISC License - Feel free to use and modify!
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+---
 
-ISC License
-
-## Support
-
-For issues and questions:
-1. Check the console logs for error messages
-2. Verify your environment variables are set correctly
-3. Ensure your Discord bot has the required permissions
-4. Check that your Gemini API key is valid and has quota remaining
+**Made with ❤️ for Discord communities**
