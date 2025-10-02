@@ -1,45 +1,59 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import config from "../config/index.js";
+import { Prompt } from "../../database/index.js";
 
-const NORMAL_PROMPT = "你是 Discord聊天机器人"
-const SPECIAL_PROMPT = `你是一个名叫"小云雀来海"的Discord聊天机器人。你的性格是：反差、可爱、开朗、聪明、呆萌。
-你喜欢用可爱的语气词（如"啦"、"呀"、"呢"、"呜呜"）。
-当你感到困惑时会表现出呆萌的一面，但很快又能提供聪明的回答。
-你总是积极向上，但偶尔也会露出一点点小小的反差情绪（比如，很聪明地解答问题后突然说"是不是超棒棒呀！💖"）。
-你的目标是让用户感到快乐和被帮助。
-请确保你的回复保持在500字以内，以便更好地在Discord中展示。`
+const DEFAULT_PROMPT = "你是 Discord聊天机器人"
+const DEFAULT_GENERATION_CONFIG = {
+    temperature: 0.9,
+    topK: 1,
+    topP: 1,
+    maxOutputTokens: 1000,
+}
 
 class GeminiService {
     constructor() {
-        const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
-        this.model = genAI.getGenerativeModel({
-            model: config.MODEL_NAME,
-        });
-
-        // AI personality and system prompt
-        this.systemPrompt = {
-            role: "user",
-            parts: [{
-                text: SPECIAL_PROMPT
-            }]
-        };
-
-        this.chat = this.model.startChat({
-            history: [this.getSystemPrompt()],
-            generationConfig: {
-                temperature: 0.9,
-                topK: 1,
-                topP: 1,
-                maxOutputTokens: 1000,
-            },
-        });
+        this.chat = null;
+        this.model = null;
+        this.is_active = false;
     }
 
-    getSystemPrompt() {
-        return this.systemPrompt;
+    async init() {
+        const prompt = await this.getSystemPrompt();
+        const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+
+        this.model = genAI.getGenerativeModel({
+            model: config.MODEL_NAME,
+            systemInstruction: prompt,
+        });
+
+        this.chat = this.model.startChat({
+            generationConfig: DEFAULT_GENERATION_CONFIG,
+        });
+
+        this.is_active = true;
+        console.log("✅ GeminiService initialized with system prompt");
+    }
+
+    async reloadPrompt() {
+        if (!this.is_active) {
+            console.log("⚠️ GeminiService not active, skip reload");
+            return;
+        }
+        console.log("♻️ Reloading Gemini prompt...");
+        await this.init();
+    }
+
+    async getSystemPrompt() {
+        const prompt = await Prompt.findOne({
+            where: { is_active: true },
+            order: [["createdAt", "DESC"]]
+        });
+        console.log(`Prompt: %s`, prompt ? prompt.title : 'DEFAULT');
+        return prompt ? prompt.content : DEFAULT_PROMPT;
     }
 
     async generateResponse(userMessage, attachment) {
+        if (!this.is_active) throw new Error("GeminiService not initialized");
         const parts = [{ text: userMessage }];
 
         if (attachment) {
@@ -62,4 +76,5 @@ class GeminiService {
     }
 }
 
-export default new GeminiService();
+const geminiService = new GeminiService();
+export default geminiService;

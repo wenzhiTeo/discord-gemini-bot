@@ -14,7 +14,7 @@ class MessageHandler {
     }
 
     shouldReply(message) {
-        if (config.BLACKLISTED_CHANNEL_IDS.includes(message.channel)) {
+        if (config.BLACKLISTED_CHANNEL_IDS.includes(message.channel.id)) {
             return { should: false }
         }
         if (message.author.bot) return { should: false };
