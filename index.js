@@ -9,7 +9,7 @@ import {
     checkReminders
 } from "./src/services/reminder.js";
 
-import expressStart from "./src/services/express.js"
+import expressStart from "./src/server.js"
 
 // --- Discord 客户端初始化 ---
 const client = new Client({
@@ -23,7 +23,7 @@ const client = new Client({
 
 try {
     await sequelize.sync();
-    console.log('✅ Applied database resource');
+    console.log('✅ Database Resource Ready');
 
     await geminiService.init();
     console.log("✅ Gemini ready");
@@ -61,3 +61,4 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 expressStart(sequelize, geminiService)
+

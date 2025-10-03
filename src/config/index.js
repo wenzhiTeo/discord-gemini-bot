@@ -7,7 +7,10 @@ const blacklistedChannels = process.env.BLACKLISTED_CHANNEL_IDS
 
 export default {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN,
+    DISCORD_PUBLIC_KEY: process.env.DISCORD_PUBLIC_KEY,
+    
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+
     INIT_CHANNEL_ID: process.env.INIT_CHANNEL_ID,
     BLACKLISTED_CHANNEL_IDS: blacklistedChannels,
 
