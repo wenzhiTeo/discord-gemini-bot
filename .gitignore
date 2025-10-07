@@ -1,3 +1,5 @@
 .env
 .env_official
 node_modules
+.adminjs/
+.vscode/

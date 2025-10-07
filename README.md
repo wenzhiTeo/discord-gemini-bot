@@ -39,6 +39,7 @@ A Discord bot powered by Google Gemini AI with intelligent conversation, schedul
    In Discord Developer Portal, ensure your bot has:
    - Send Messages
    - Read Message History
+   - Use Slash Commands
    - Mention Everyone
    - Attach Files
    
@@ -63,11 +64,14 @@ A Discord bot powered by Google Gemini AI with intelligent conversation, schedul
 @YourBot [upload image] What do you see in this picture?
 ```
 
+#### 🔧 Slash Commands
+```
+/help                    # Show available commands
+/设置定时提醒             # Set up scheduled reminders
+```
+
 #### ⏰ Set Reminders
-```
-$设置定时提醒
-```
-Then reply to the bot's message with:
+Use the `/设置定时提醒` command, then reply with:
 ```
 14:30 Team meeting reminder
 09:00 Take medication
@@ -78,10 +82,10 @@ Then reply to the bot's message with:
 
 Visit `http://localhost:3000/admin` to:
 
-- **📝 Manage Prompts**: Create and edit AI response styles
-- **🔄 Live Updates**: Changes take effect immediately
-- **📊 View Data**: Browse all stored information
-- **⚙️ System Settings**: Configure bot behavior
+- **📝 Manage Prompts**: Create and edit AI personality styles
+- **🔄 Live Updates**: Prompt changes reload AI service automatically
+- **📊 Usage Statistics**: View prompt usage counts and activity
+- **⚙️ Database Management**: Browse and manage all stored data
 
 ### Running Options
 
@@ -119,16 +123,18 @@ Edit `src/config/index.js`:
 ```
 discord-gemini-bot/
 ├── 📂 src/
+│   ├── 📂 commands/        # Discord slash commands
 │   ├── 📂 config/          # Bot configuration
-│   ├── 📂 handlers/        # Message processing
+│   ├── 📂 handlers/        # Message & command processing
+│   ├── 📂 routes/          # API endpoints
 │   ├── 📂 services/        # Core services (AI, reminders)
-│   └── 📂 utils/          # Helper functions
+│   └── 📄 server.js        # Express server
 ├── 📂 database/
-│   ├── 📂 models/         # Data models
+│   ├── 📂 models/         # Data models (prompts, etc.)
 │   └── 📄 index.js        # Database setup
-├── 📄 index.js            # Main application
+├── 📄 index.js            # Main application entry
 ├── 📄 .env               # Environment variables
-└── 📄 database.sqlite    # SQLite database
+└── 📄 database.sqlite    # SQLite database (auto-created)
 ```
 
 ## 🛠️ Tech Stack
@@ -147,24 +153,32 @@ discord-gemini-bot/
 ### Common Issues
 
 **Bot not responding:**
-- ✅ Check Discord bot permissions
+- ✅ Check Discord bot permissions (including slash commands)
 - ✅ Verify `DISCORD_TOKEN` in `.env` file
 - ✅ Ensure bot is mentioned in message (if mention-only mode enabled)
+- ✅ Check console logs for connection errors
 
 **AI responses failing:**
-- ✅ Verify `GEMINI_API_KEY` is valid
-- ✅ Check API quota limits
-- ✅ Review console error logs
+- ✅ Verify `GEMINI_API_KEY` is valid and active
+- ✅ Check API quota limits and billing
+- ✅ Review console error logs for specific errors
 
 **Admin panel not loading:**
 - ✅ Ensure port 3000 is available
 - ✅ Confirm bot is running (`npm start`)
 - ✅ Visit `http://localhost:3000/admin`
+- ✅ Check firewall settings
 
 **Reminders not working:**
+- ✅ Use `/设置定时提醒` slash command first
 - ✅ Use correct format: `HH:mm reminder text`
 - ✅ Check console for cron job logs
 - ✅ Verify bot has send message permissions
+
+**Database issues:**
+- ✅ Default prompts seed only on first run (empty database)
+- ✅ Delete `database.sqlite` to reset all data
+- ✅ Check file permissions for database creation
 
 ### Debug Mode
 
