@@ -52,7 +52,9 @@ A Discord bot powered by Google Gemini AI with intelligent conversation, schedul
    npm start
    ```
    
-   Admin panel: `http://localhost:3000/admin`
+   **Available URLs:**
+   - Admin panel: `http://localhost:3000/admin`
+   - Health check: `http://localhost:3000/health`
 
 ## 📖 Usage
 
@@ -66,16 +68,19 @@ A Discord bot powered by Google Gemini AI with intelligent conversation, schedul
 
 #### 🔧 Slash Commands
 ```
-/help                    # Show available commands
-/设置定时提醒             # Set up scheduled reminders
+/help                    # Show all available commands
+/ping                    # Check bot latency and status
+/remind                  # Set a reminder for specific time
+/reminders               # List all your active reminders
+/clear-reminders         # Clear all your active reminders
 ```
 
 #### ⏰ Set Reminders
-Use the `/设置定时提醒` command, then reply with:
+Use the `/remind` command with time in HHMM format:
 ```
-14:30 Team meeting reminder
-09:00 Take medication
-20:00 Call mom
+/remind time:1430 message:Team meeting reminder
+/remind time:0900 message:Take medication
+/remind time:2000 message:Call mom
 ```
 
 ### Admin Panel
@@ -170,10 +175,11 @@ discord-gemini-bot/
 - ✅ Check firewall settings
 
 **Reminders not working:**
-- ✅ Use `/设置定时提醒` slash command first
-- ✅ Use correct format: `HH:mm reminder text`
+- ✅ Use `/remind time:HHMM message:your text` format (e.g., `/remind time:1430 message:Meeting`)
+- ✅ Time format is HHMM (no colon): 0900, 1430, 2000
 - ✅ Check console for cron job logs
 - ✅ Verify bot has send message permissions
+- ✅ Use `/reminders` to see active reminders
 
 **Database issues:**
 - ✅ Default prompts seed only on first run (empty database)

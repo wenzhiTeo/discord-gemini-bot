@@ -52,7 +52,9 @@
    npm start
    ```
    
-   管理面板地址：`http://localhost:3000/admin`
+   **可用地址：**
+   - 管理面板：`http://localhost:3000/admin`
+   - 健康检查：`http://localhost:3000/health`
 
 ## 📖 使用方法
 
@@ -66,16 +68,19 @@
 
 #### 🔧 斜杠命令
 ```
-/help                    # 显示可用命令
-/设置定时提醒             # 设置定时提醒
+/help                    # 显示所有可用命令
+/ping                    # 检查机器人延迟和状态
+/remind                  # 设置特定时间的提醒
+/reminders               # 列出所有活跃提醒
+/clear-reminders         # 清除所有活跃提醒
 ```
 
 #### ⏰ 设置提醒
-使用 `/设置定时提醒` 命令，然后回复：
+使用 `/remind` 命令，时间格式为 HHMM：
 ```
-14:30 开会提醒
-09:00 吃药时间
-20:00 给妈妈打电话
+/remind time:1430 message:开会提醒
+/remind time:0900 message:吃药时间
+/remind time:2000 message:给妈妈打电话
 ```
 
 ### 管理面板
@@ -170,10 +175,11 @@ discord-gemini-bot/
 - ✅ 检查防火墙设置
 
 **提醒功能不工作：**
-- ✅ 先使用 `/设置定时提醒` 斜杠命令
-- ✅ 使用正确格式：`HH:mm 提醒内容`
+- ✅ 使用 `/remind time:HHMM message:提醒内容` 格式（例如：`/remind time:1430 message:开会`）
+- ✅ 时间格式为 HHMM（无冒号）：0900, 1430, 2000
 - ✅ 检查控制台定时任务日志
 - ✅ 确认机器人有发送消息权限
+- ✅ 使用 `/reminders` 查看活跃提醒
 
 **数据库问题：**
 - ✅ 默认提示词仅在首次运行时（空数据库）创建
