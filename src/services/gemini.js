@@ -2,13 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import config from "../config/index.js";
 import { Prompt } from "../../database/index.js";
 
-const DEFAULT_PROMPT = "你是 Discord聊天机器人"
-const DEFAULT_GENERATION_CONFIG = {
-    temperature: 0.9,
-    topK: 1,
-    topP: 1,
-    maxOutputTokens: 1000,
-}
+const DEFAULT_PROMPT = "你是一个Discord聊天机器人，友好、有帮助且富有创造力。";
 
 class GeminiService {
     constructor() {
@@ -18,61 +12,106 @@ class GeminiService {
     }
 
     async init() {
-        const prompt = await this.getSystemPrompt();
-        const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+        try {
+            const prompt = await this.getSystemPrompt();
+            const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
 
-        this.model = genAI.getGenerativeModel({
-            model: config.MODEL_NAME,
-            systemInstruction: prompt,
-        });
+            this.model = genAI.getGenerativeModel({
+                model: config.MODEL_NAME,
+                systemInstruction: prompt,
+            });
 
-        this.chat = this.model.startChat({
-            generationConfig: DEFAULT_GENERATION_CONFIG,
-        });
+            this.chat = this.model.startChat({
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1000,
+                }
+            });
 
-        this.is_active = true;
-        console.log("✅ GeminiService initialized with system prompt");
+            this.is_active = true;
+            console.log("✅ Gemini ready");
+        } catch (error) {
+            console.error("❌ Gemini init failed:", error);
+            throw error;
+        }
     }
 
     async reloadPrompt() {
-        if (!this.is_active) {
-            console.log("⚠️ GeminiService not active, skip reload");
-            return;
-        }
-        console.log("♻️ Reloading Gemini prompt...");
+        if (!this.is_active) return;
+        console.log("♻️ Reloading prompt...");
         await this.init();
     }
 
     async getSystemPrompt() {
-        const prompt = await Prompt.findOne({
-            where: { is_active: true },
-            order: [["createdAt", "DESC"]]
-        });
-        console.log(`Prompt: %s`, prompt ? prompt.title : 'DEFAULT');
-        return prompt ? prompt.content : DEFAULT_PROMPT;
+        try {
+            const prompt = await Prompt.getActive();
+            return prompt ? prompt.content : DEFAULT_PROMPT;
+        } catch (error) {
+            console.error("❌ Error getting prompt -> use default prompt");
+            return DEFAULT_PROMPT;
+        }
     }
 
     async generateResponse(userMessage, attachment) {
-        if (!this.is_active) throw new Error("GeminiService not initialized");
-        const parts = [{ text: userMessage }];
+        if (!this.is_active) throw new Error("Gemini not initialized");
+        if (!userMessage && !attachment) throw new Error("No content provided");
 
-        if (attachment) {
-            // 下载图片并转 base64
-            const res = await fetch(attachment.url);
-            const buffer = await res.arrayBuffer();
-            const base64 = Buffer.from(buffer).toString("base64");
+        try {
+            const parts = [];
 
-            parts.push({
-                inlineData: {
-                    mimeType: attachment.contentType,
-                    data: base64,
-                },
-            });
+            if (userMessage?.trim()) {
+                parts.push({ text: userMessage });
+            }
+
+            if (attachment) {
+                const imageData = await this.downloadImage(attachment.url);
+                if (imageData) {
+                    parts.push({
+                        inlineData: {
+                            mimeType: attachment.contentType,
+                            data: imageData,
+                        },
+                    });
+                }
+            }
+
+            const result = await this.chat.sendMessage(parts);
+            return result.response.text();
+        } catch (error) {
+            console.error("❌ Generate response failed:", error);
+            throw error;
         }
+    }
 
-        const result = await this.chat.sendMessage(parts);
+    async downloadImage(url, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), config.IMAGE_DOWNLOAD_TIMEOUT);
 
-        return result.response.text();
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const buffer = await response.arrayBuffer();
+                return Buffer.from(buffer).toString("base64");
+            } catch (error) {
+                console.error(`❌ Image download attempt ${i + 1} failed:`, error.message);
+                if (i === retries - 1) return null;
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+        return null;
+    }
+
+    getStatus() {
+        return {
+            active: this.is_active,
+            model: config.MODEL_NAME
+        };
     }
 }
 

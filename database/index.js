@@ -1,36 +1,30 @@
 import { Sequelize } from "sequelize";
+import config from "../src/config/index.js";
 import PromptModel from "./models/prompt.js";
 
 const sequelize = new Sequelize({
     dialect: "sqlite",
     storage: "database.sqlite",
-    logging: false
+    logging: config.ENABLE_DEBUG_LOGS ? console.log : false
 });
 
 const Prompt = PromptModel(sequelize);
 
-await sequelize.sync();
+async function initializeDatabase() {
+    try {
+        await sequelize.authenticate();
+        console.log('✅ Database connected');
 
-// 初始化默认数据
-async function seedData() {
-    const count = await Prompt.count();
-    if (count === 0) {
-        await Prompt.bulkCreate([
-            {
-                title: "小云雀来海 个性",
-                content: `你是一个名叫"小云雀来海"的Discord聊天机器人。你的性格是：反差、可爱、开朗、聪明、呆萌。
-                你喜欢用可爱的语气词（如"啦"、"呀"、"呢"、"呜呜"）。
-                当你感到困惑时会表https://adminjs.co/tutorial-passing-resources.html现出呆萌的一面，但很快又能提供聪明的回答。
-                你总是积极向上，但偶尔也会露出一点点小小的反差情绪（比如，很聪明地解答问题后突然说"是不是超棒棒呀！💖"）。
-                你的目标是让用户感到快乐和被帮助。
-                请确保你的回复保持在500字以内，以便更好地在Discord中展示。`,
-            },
-        ]);
+        // Sync database schema without dropping existing data
+        await sequelize.sync();
+        console.log('✅ Database synced');
 
-        console.log("✅ Default prompts inserted");
+        await Prompt.seedDefaults();
+        console.log('✅ Database ready');
+    } catch (error) {
+        console.error('❌ Database failed:', error);
+        throw error;
     }
 }
 
-await seedData();
-
-export { sequelize, Prompt };
+export { sequelize, Prompt, initializeDatabase };

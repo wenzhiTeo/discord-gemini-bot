@@ -1,9 +1,6 @@
 import express from "express";
 
-
-
 export default function createGeminiServicesRoute(geminiService) {
-
     const router = express.Router();
 
     // API route: reload Gemini prompt
@@ -17,6 +14,6 @@ export default function createGeminiServicesRoute(geminiService) {
         }
     });
 
-    return router
+    return router;
 }
 

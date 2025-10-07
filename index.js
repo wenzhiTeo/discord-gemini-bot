@@ -2,16 +2,24 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import config from "./src/config/index.js";
 import geminiService from "./src/services/gemini.js";
 import MessageHandler from "./src/handlers/messageHandler.js";
-import DirectMessage from "./src/utils/directMessage.js";
-import cron from "node-cron";
-import { sequelize } from "./database/index.js";
-import {
-    checkReminders
-} from "./src/services/reminder.js";
+import messaging from "./src/services/messaging.js";
+import { sequelize, initializeDatabase } from "./database/index.js";
+import expressStart from "./src/server.js";
+import CommandHandler from "./src/handlers/commandHandler.js";
+import { setupCronJobs } from "./src/handlers/cronScheduler.js";
+import { ReminderService } from "./src/services/reminder.js";
 
-import expressStart from "./src/server.js"
+// Initialize services
+try {
+    await initializeDatabase();
+    await geminiService.init();
+    console.log("✅ Services ready");
+} catch (err) {
+    console.error("❌ Startup failed:", err);
+    process.exit(1);
+}
 
-// --- Discord 客户端初始化 ---
+// Setup Discord client
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -21,44 +29,35 @@ const client = new Client({
     ],
 });
 
-try {
-    await sequelize.sync();
-    console.log('✅ Database Resource Ready');
-
-    await geminiService.init();
-    console.log("✅ Gemini ready");
-} catch (err) {
-    console.error("❌ Startup failed:", err);
-}
-
 client.login(config.DISCORD_TOKEN);
+messaging.setClient(client);
+
 const messageHandler = new MessageHandler(client);
-DirectMessage.setClient(client);
+const commandHandler = new CommandHandler(client, config.DISCORD_TOKEN);
 
-// --- Bot online ---
+// Setup services
+const services = {
+    reminderService: new ReminderService(client)
+};
+setupCronJobs(client, services);
+
+// Bot ready
 client.on(Events.ClientReady, async (c) => {
-    console.log(`✅ Ready! Logged in as ${c.user.tag}`);
+    console.log(`✅ Bot ready: ${c.user.tag}`);
 
-    // Send notice message to private channel
     if (config.INIT_CHANNEL_ID) {
-        try {
-            await DirectMessage.sendToChannel(config.INIT_CHANNEL_ID, "@everyone Hi, personal bot online");
-            const response = await geminiService.generateResponse("简单介绍一下你自己");
-            await DirectMessage.sendToChannel(config.INIT_CHANNEL_ID, `@everyone ${response}`);
-
-            console.log("✅ Init message sent to channel");
-        } catch (err) {
-            console.error("❌ Failed to send init message", err);
-        }
+        messaging.sendIntroMessage(config.INIT_CHANNEL_ID, geminiService);
     }
+
+    commandHandler.registerCommands();
+    commandHandler.setupListeners(services);
 });
 
-cron.schedule("* * * * *", () => checkReminders(client));
-
-// --- 消息事件 ---
+// Handle messages
 client.on(Events.MessageCreate, async (message) => {
     await messageHandler.handleMessage(message);
 });
 
-expressStart(sequelize, geminiService)
+// Start web server
+expressStart(sequelize, geminiService);
 
